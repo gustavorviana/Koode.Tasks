@@ -2,9 +2,11 @@ using Koode.Tasks.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDatabase(builder.Configuration.GetConnectionString("Default"));
-
-builder.Services.AddControllers();
+builder
+    .Services
+    .AddDatabase(builder.Configuration.GetConnectionString("Default"))
+    .AddAppServices()
+    .AddControllers();
 
 var app = builder.Build();
 
