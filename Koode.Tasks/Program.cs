@@ -1,6 +1,8 @@
+using Koode.Tasks.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddDatabase(builder.Configuration.GetConnectionString("Default"));
 
 builder.Services.AddControllers();
 
