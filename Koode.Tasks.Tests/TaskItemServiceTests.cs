@@ -33,22 +33,22 @@ public class TaskItemServiceTests
         var created = new DateTime(2026, 1, 1, 10, 0, 0, DateTimeKind.Utc);
         var updated = new DateTime(2026, 1, 2, 11, 0, 0, DateTimeKind.Utc);
 
-        _dbContext.TaskItems.AddRange(
-            new TaskItemEntity
+        _dbContext.Tasks.AddRange(
+            new TaskEntity
             {
                 Id = 1,
                 Title = "Task A",
                 Description = "Desc A",
-                Status = TaskItemStatus.Pending,
+                Status = Enums.TaskStatus.Pending,
                 CreatedAt = created,
                 UpdatedAt = updated
             },
-            new TaskItemEntity
+            new TaskEntity
             {
                 Id = 2,
                 Title = "Task B",
                 Description = "Desc B",
-                Status = TaskItemStatus.Done,
+                Status = Enums.TaskStatus.Done,
                 CreatedAt = created,
                 UpdatedAt = updated
             });
@@ -61,12 +61,12 @@ public class TaskItemServiceTests
 
         var first = Assert.Single(result, r => r.Id == 1);
         Assert.Equal("Task A", first.Title);
-        Assert.Equal(TaskItemStatus.Pending, first.Status);
+        Assert.Equal(Enums.TaskStatus.Pending, first.Status);
         Assert.Equal(created, first.CreatedAt);
         Assert.Equal(updated, first.UpdatedAt);
 
         var second = Assert.Single(result, r => r.Id == 2);
         Assert.Equal("Task B", second.Title);
-        Assert.Equal(TaskItemStatus.Done, second.Status);
+        Assert.Equal(Enums.TaskStatus.Done, second.Status);
     }
 }

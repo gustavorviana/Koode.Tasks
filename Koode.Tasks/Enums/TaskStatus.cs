@@ -1,6 +1,6 @@
 ﻿namespace Koode.Tasks.Enums;
 
-public enum TaskItemStatus
+public enum TaskStatus
 {
     Pending,
     InProgress,

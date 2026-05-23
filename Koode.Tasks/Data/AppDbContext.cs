@@ -6,7 +6,7 @@ namespace Koode.Tasks.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<TaskItemEntity> TaskItems { get; set; }
+    public DbSet<TaskEntity> Tasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

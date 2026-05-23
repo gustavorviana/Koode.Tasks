@@ -10,8 +10,7 @@ public static class DatabaseExtensions
         if (string.IsNullOrEmpty(connectionString))
             throw new InvalidOperationException("A Connection String do banco não está configurada.");
 
-        services.AddDbContextFactory<AppDbContext>(options =>
-            options.UseSqlite(connectionString, sql => sql.CommandTimeout(120)));
+        services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
         return services;
     }
 }

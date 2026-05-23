@@ -17,7 +17,7 @@ namespace Koode.Tasks.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
 
-            modelBuilder.Entity("Koode.Tasks.Entities.TaskItemEntity", b =>
+            modelBuilder.Entity("Koode.Tasks.Entities.TaskEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,12 +36,12 @@ namespace Koode.Tasks.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskItem", (string)null);
+                    b.ToTable("Tasks", (string)null);
                 });
 #pragma warning restore 612, 618
         }

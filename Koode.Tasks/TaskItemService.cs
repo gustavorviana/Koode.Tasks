@@ -9,28 +9,28 @@ namespace Koode.Tasks;
 
 public class TaskItemService(AppDbContext context)
 {
-    public async Task<TaskItemResponse[]> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<TaskResponse[]> GetAllAsync(CancellationToken cancellationToken)
     {
-        var items = await context.TaskItems.ToArrayAsync(cancellationToken);
+        var items = await context.Tasks.ToArrayAsync(cancellationToken);
         return [..items.Select(MapToResponse)];
     }
 
-    public async Task<TaskItemResponse> CreateAsync(CreateTaskRequest request, CancellationToken cancellationToken)
+    public async Task<TaskResponse> CreateAsync(CreateTaskRequest request, CancellationToken cancellationToken)
     {
-        var entity = new TaskItemEntity
+        var entity = new TaskEntity
         {
             Title = request.Title,
             Description = request.Description,
-            Status = TaskItemStatus.Pending
+            Status = Enums.TaskStatus.Pending
         };
 
-        context.TaskItems.Add(entity);
+        context.Tasks.Add(entity);
         await context.SaveChangesAsync(cancellationToken);
 
         return MapToResponse(entity);
     }
 
-    private TaskItemResponse MapToResponse(TaskItemEntity item)
+    private TaskResponse MapToResponse(TaskEntity item)
         => new()
         {
             Id = item.Id,
