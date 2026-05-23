@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Koode.Tasks.DependencyInjection;
 using Koode.Tasks.Exceptions;
 
@@ -9,7 +11,12 @@ builder
     .AddAppServices()
     .AddExceptionHandler<AppExceptionHandler>()
     .AddProblemDetails()
-    .AddControllers();
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
+    });
 
 var app = builder.Build();
 

@@ -5,17 +5,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { TaskStatus } from "@/types/task"
 
-const options = [
+export type StatusFilter = TaskStatus | "all"
+
+const options: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "Todos os status" },
   { value: "pending", label: "Pendente" },
   { value: "in_progress", label: "Em andamento" },
   { value: "done", label: "Concluída" },
 ]
 
-export function StatusFilterSelect() {
+export function StatusFilterSelect({
+  value,
+  onChange,
+}: {
+  value: StatusFilter
+  onChange: (next: StatusFilter) => void
+}) {
   return (
-    <Select defaultValue="all">
+    <Select value={value} onValueChange={(v) => onChange(v as StatusFilter)}>
       <SelectTrigger className="w-45" aria-label="Filtrar por status">
         <SelectValue />
       </SelectTrigger>

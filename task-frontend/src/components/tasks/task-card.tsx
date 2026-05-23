@@ -1,17 +1,7 @@
 import { Check, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-type Status = "pending" | "in_progress" | "done"
-
-export type Task = {
-  id: number
-  title: string
-  description: string | null
-  status: Status
-  createdAt: string
-  updatedAt: string | null
-}
+import type { Task } from "@/types/task"
 
 const dateFmt = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",

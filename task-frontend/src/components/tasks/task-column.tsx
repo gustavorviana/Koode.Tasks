@@ -1,9 +1,8 @@
 import type { ReactNode } from "react"
 import { cn } from "@/lib/utils"
+import type { TaskStatus } from "@/types/task"
 
-type Status = "pending" | "in_progress" | "done"
-
-const headerColors: Record<Status, string> = {
+const headerColors: Record<TaskStatus, string> = {
   pending: "bg-amber-500",
   in_progress: "bg-sky-500",
   done: "bg-emerald-500",
@@ -15,7 +14,7 @@ export function TaskColumn({
   count,
   children,
 }: {
-  status: Status
+  status: TaskStatus
   title: string
   count: number
   children: ReactNode
