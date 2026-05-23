@@ -1,4 +1,6 @@
-import { Check, Pencil, Trash2 } from "lucide-react"
+/* eslint-disable react-hooks/refs */
+import { Trash2 } from "lucide-react"
+import { useDraggable } from "@dnd-kit/core"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { Task } from "@/types/task"
@@ -8,14 +10,32 @@ const dateFmt = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
 })
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCard({
+  task,
+  onDelete,
+  isDragging,
+}: {
+  task: Task
+  onDelete: (task: Task) => void
+  isDragging?: boolean
+}) {
   const isDone = task.status === "done"
+  const draggable = useDraggable({
+    id: task.id,
+    data: { task },
+    disabled: isDone,
+  })
 
   return (
     <article
+      ref={draggable.setNodeRef}
+      {...draggable.attributes}
+      {...draggable.listeners}
       className={cn(
         "group rounded-md border bg-card p-3 shadow-xs transition-shadow",
         "hover:shadow-sm",
+        isDone ? "cursor-default" : "cursor-grab active:cursor-grabbing",
+        (draggable.isDragging || isDragging) && "opacity-50",
       )}
     >
       <h3
@@ -38,35 +58,19 @@ export function TaskCard({ task }: { task: Task }) {
           {dateFmt.format(new Date(task.createdAt))}
         </time>
 
-        <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-          {!isDone && (
-            <>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="size-7"
-                aria-label="Concluir"
-                title="Concluir"
-              >
-                <Check className="size-3.5" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="size-7"
-                aria-label="Editar"
-                title="Editar"
-              >
-                <Pencil className="size-3.5" />
-              </Button>
-            </>
-          )}
+        <div className="opacity-0 transition-opacity group-hover:opacity-100">
           <Button
+            type="button"
             size="icon"
             variant="ghost"
             className="size-7 text-muted-foreground hover:text-destructive"
             aria-label="Excluir"
             title="Excluir"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(task)
+            }}
           >
             <Trash2 className="size-3.5" />
           </Button>

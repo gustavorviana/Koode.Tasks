@@ -54,5 +54,9 @@ export function useTasks(filter: TaskStatus | undefined) {
     }
   }, [filter])
 
-  return { ...state, refetch }
+  const setTasks = useCallback((updater: (prev: Task[]) => Task[]) => {
+    setState((s) => ({ ...s, tasks: updater(s.tasks) }))
+  }, [])
+
+  return { ...state, refetch, setTasks }
 }

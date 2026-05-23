@@ -189,6 +189,31 @@ public class TaskServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_WhenEntityIsDone_ThrowsBadRequestException()
+    {
+        var entity = new TaskEntity
+        {
+            Title = "Done task",
+            Status = Enums.TaskStatus.Done
+        };
+        _dbContext.Tasks.Add(entity);
+        await _dbContext.SaveChangesAsync();
+
+        var service = new TaskService(_dbContext);
+        var request = new UpdateTaskRequest
+        {
+            Title = "Updated",
+            Description = null,
+            Status = Enums.TaskStatus.Pending
+        };
+
+        var ex = await Assert.ThrowsAsync<BadRequestException>(
+            () => service.UpdateAsync(entity.Id, request, CancellationToken.None));
+
+        Assert.Equal(HttpStatusCode.BadRequest, ex.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateAsync_WhenEntityNotFound_ThrowsNotFoundException()
     {
         var service = new TaskService(_dbContext);
@@ -203,7 +228,7 @@ public class TaskServiceTests
             () => service.UpdateAsync(999, request, CancellationToken.None));
 
         Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
-        Assert.Equal("Task with id 999 not found.", ex.Message);
+        Assert.Equal("Tarefa com id 999 não encontrada.", ex.Message);
     }
 
     [Fact]
@@ -232,7 +257,7 @@ public class TaskServiceTests
             () => service.DeleteAsync(999, CancellationToken.None));
 
         Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
-        Assert.Equal("Task with id 999 not found.", ex.Message);
+        Assert.Equal("Tarefa com id 999 não encontrada.", ex.Message);
     }
 
     [Fact]

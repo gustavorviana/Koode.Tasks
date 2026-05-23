@@ -38,7 +38,10 @@ public class TaskService(AppDbContext context)
     public async Task<TaskResponse> UpdateAsync(int id, UpdateTaskRequest request, CancellationToken cancellationToken)
     {
         var entity = await context.Tasks.FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
-            throw new NotFoundException($"Task with id {id} not found.");
+            throw new NotFoundException($"Tarefa com id {id} não encontrada.");
+
+        if (entity.Status == Enums.TaskStatus.Done)
+            throw new BadRequestException("Tarefas concluídas não podem ser alteradas.");
 
         entity.Title = request.Title;
         entity.Description = request.Description;
@@ -52,7 +55,7 @@ public class TaskService(AppDbContext context)
     public async Task DeleteAsync(int id, CancellationToken cancellationToken)
     {
         var entity = await context.Tasks.FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
-            throw new NotFoundException($"Task with id {id} not found.");
+            throw new NotFoundException($"Tarefa com id {id} não encontrada.");
 
         context.Tasks.Remove(entity);
         await context.SaveChangesAsync(cancellationToken);

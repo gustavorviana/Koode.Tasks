@@ -1,5 +1,14 @@
 import { useState } from "react"
 import { Plus, RotateCw } from "lucide-react"
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core"
 import { Button } from "@/components/ui/button"
 import { TaskCard } from "@/components/tasks/task-card"
 import { TaskColumn } from "@/components/tasks/task-column"
@@ -8,7 +17,8 @@ import {
   type StatusFilter,
 } from "@/components/tasks/status-filter"
 import { useTasks } from "@/hooks/use-tasks"
-import type { TaskStatus } from "@/types/task"
+import { useTaskMutations } from "@/hooks/use-task-mutations"
+import type { Task, TaskStatus } from "@/types/task"
 
 const columns: { status: TaskStatus; title: string }[] = [
   { status: "pending", title: "Pendente" },
@@ -20,10 +30,53 @@ function App() {
   const [filter, setFilter] = useState<StatusFilter>("all")
   const backendFilter = filter === "all" ? undefined : filter
 
-  const { tasks, loading, error, refetch } = useTasks(backendFilter)
+  const { tasks, loading, error, refetch, setTasks } = useTasks(backendFilter)
+  const mutations = useTaskMutations()
+
+  const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  )
 
   const visibleColumns =
     filter === "all" ? columns : columns.filter((c) => c.status === filter)
+
+  function handleDragStart(event: DragStartEvent) {
+    const task = event.active.data.current?.task as Task | undefined
+    setActiveTask(task ?? null)
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    setActiveTask(null)
+    const task = event.active.data.current?.task as Task | undefined
+    const targetStatus = event.over?.data.current?.status as
+      | TaskStatus
+      | undefined
+
+    if (!task || !targetStatus || task.status === targetStatus) return
+    if (task.status === "done") return
+
+    const previous = tasks
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, status: targetStatus } : t)),
+    )
+
+    const updated = await mutations.changeStatus(task, targetStatus)
+    if (!updated) {
+      setTasks(() => previous)
+    } else {
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+    }
+  }
+
+  async function handleDelete(task: Task) {
+    const previous = tasks
+    setTasks((prev) => prev.filter((t) => t.id !== task.id))
+
+    const ok = await mutations.remove(task.id)
+    if (ok === null) setTasks(() => previous)
+  }
 
   return (
     <div className="min-h-svh bg-background text-foreground">
@@ -46,6 +99,19 @@ function App() {
           </div>
         </header>
 
+        {mutations.error && (
+          <div className="mt-4 flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+            <span>{mutations.error}</span>
+            <button
+              type="button"
+              onClick={mutations.clearError}
+              className="text-xs underline hover:no-underline"
+            >
+              fechar
+            </button>
+          </div>
+        )}
+
         {error ? (
           <div className="mt-8 rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center">
             <p className="text-sm text-destructive">{error}</p>
@@ -60,35 +126,57 @@ function App() {
             </Button>
           </div>
         ) : (
-          <section
-            className={
-              filter === "all"
-                ? "mt-8 grid gap-4 md:grid-cols-3"
-                : "mt-8 grid gap-4"
-            }
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={() => setActiveTask(null)}
           >
-            {visibleColumns.map((col) => {
-              const items = tasks.filter((t) => t.status === col.status)
-              return (
-                <TaskColumn
-                  key={col.status}
-                  status={col.status}
-                  title={col.title}
-                  count={items.length}
-                >
-                  {loading ? (
-                    <ColumnSkeleton />
-                  ) : items.length === 0 ? (
-                    <div className="rounded-md border border-dashed py-6 text-center">
-                      <p className="text-xs text-muted-foreground">Vazio</p>
-                    </div>
-                  ) : (
-                    items.map((task) => <TaskCard key={task.id} task={task} />)
-                  )}
-                </TaskColumn>
-              )
-            })}
-          </section>
+            <section
+              className={
+                filter === "all"
+                  ? "mt-8 grid gap-4 md:grid-cols-3"
+                  : "mt-8 grid gap-4"
+              }
+            >
+              {visibleColumns.map((col) => {
+                const items = tasks.filter((t) => t.status === col.status)
+                return (
+                  <TaskColumn
+                    key={col.status}
+                    status={col.status}
+                    title={col.title}
+                    count={items.length}
+                  >
+                    {loading ? (
+                      <ColumnSkeleton />
+                    ) : items.length === 0 ? (
+                      <div className="rounded-md border border-dashed py-6 text-center">
+                        <p className="text-xs text-muted-foreground">Vazio</p>
+                      </div>
+                    ) : (
+                      items.map((task) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          onDelete={handleDelete}
+                          isDragging={activeTask?.id === task.id}
+                        />
+                      ))
+                    )}
+                  </TaskColumn>
+                )
+              })}
+            </section>
+
+            <DragOverlay dropAnimation={null}>
+              {activeTask && (
+                <div className="rotate-1">
+                  <TaskCard task={activeTask} onDelete={() => {}} />
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
         )}
       </div>
     </div>
