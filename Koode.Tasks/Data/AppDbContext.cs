@@ -19,6 +19,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ApplyAuditFields();
         return base.SaveChanges();
     }
+    
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyAuditFields();
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
     private void ApplyAuditFields()
     {
