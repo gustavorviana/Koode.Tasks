@@ -207,6 +207,35 @@ public class TaskServiceTests
     }
 
     [Fact]
+    public async Task DeleteAsync_WhenEntityExists_RemovesFromDatabase()
+    {
+        var entity = new TaskEntity
+        {
+            Title = "ToDelete",
+            Status = Enums.TaskStatus.Pending
+        };
+        _dbContext.Tasks.Add(entity);
+        await _dbContext.SaveChangesAsync();
+
+        var service = new TaskService(_dbContext);
+        await service.DeleteAsync(entity.Id, CancellationToken.None);
+
+        Assert.Empty(await _dbContext.Tasks.ToArrayAsync());
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenEntityNotFound_ThrowsNotFoundException()
+    {
+        var service = new TaskService(_dbContext);
+
+        var ex = await Assert.ThrowsAsync<NotFoundException>(
+            () => service.DeleteAsync(999, CancellationToken.None));
+
+        Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
+        Assert.Equal("Task with id 999 not found.", ex.Message);
+    }
+
+    [Fact]
     public async Task UpdateAsync_CanClearDescriptionToNull()
     {
         var entity = new TaskEntity

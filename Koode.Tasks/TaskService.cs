@@ -49,6 +49,15 @@ public class TaskService(AppDbContext context)
         return MapToResponse(entity);
     }
 
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken)
+    {
+        var entity = await context.Tasks.FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
+            throw new NotFoundException($"Task with id {id} not found.");
+
+        context.Tasks.Remove(entity);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     private TaskResponse MapToResponse(TaskEntity item)
         => new()
         {

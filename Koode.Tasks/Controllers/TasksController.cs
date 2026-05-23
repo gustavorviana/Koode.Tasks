@@ -19,4 +19,8 @@ public class TasksController(TaskService service) : ControllerBase
     [HttpPut("{id:int}")]
         public async Task<TaskResponse> UpdateAsync(int id, UpdateTaskRequest request, CancellationToken cancellationToken)
         => await service.UpdateAsync(id, request, cancellationToken);
+
+    [HttpDelete("{id:int}")]
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken)
+        => await service.DeleteAsync(id, cancellationToken);
 }
