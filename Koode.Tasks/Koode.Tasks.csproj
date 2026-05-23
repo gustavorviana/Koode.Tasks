@@ -35,7 +35,7 @@
     <Exec Command="pnpm install --frozen-lockfile" WorkingDirectory="$(SpaRoot)" />
   </Target>
 
-  <Target Name="BuildSpa" BeforeTargets="AssignTargetPaths" Inputs="@(SpaInputs)" Outputs="$(MSBuildProjectDirectory)\wwwroot\index.html">
+  <Target Name="BuildSpa" BeforeTargets="BeforeBuild;ResolveProjectStaticWebAssets" Inputs="@(SpaInputs)" Outputs="$(MSBuildProjectDirectory)\wwwroot\index.html">
     <Exec Command="pnpm run build" WorkingDirectory="$(SpaRoot)" />
     <ItemGroup>
       <_SpaDistFiles Include="$(SpaDist)**\*" />
