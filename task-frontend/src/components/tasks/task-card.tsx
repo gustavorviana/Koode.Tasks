@@ -13,10 +13,12 @@ const dateFmt = new Intl.DateTimeFormat("pt-BR", {
 export function TaskCard({
   task,
   onDelete,
+  onEdit,
   isDragging,
 }: {
   task: Task
   onDelete: (task: Task) => void
+  onEdit?: (task: Task) => void
   isDragging?: boolean
 }) {
   const isDone = task.status === "done"
@@ -26,15 +28,23 @@ export function TaskCard({
     disabled: isDone,
   })
 
+  function handleClick() {
+    if (isDone || draggable.isDragging) return
+    onEdit?.(task)
+  }
+
   return (
     <article
       ref={draggable.setNodeRef}
       {...draggable.attributes}
       {...draggable.listeners}
+      onClick={handleClick}
       className={cn(
         "group rounded-md border bg-card p-3 shadow-xs transition-shadow",
         "hover:shadow-sm",
-        isDone ? "cursor-default" : "cursor-grab active:cursor-grabbing",
+        isDone
+          ? "cursor-default"
+          : "cursor-grab active:cursor-grabbing hover:border-foreground/20",
         (draggable.isDragging || isDragging) && "opacity-50",
       )}
     >

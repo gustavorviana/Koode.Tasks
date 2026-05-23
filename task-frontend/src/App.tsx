@@ -18,7 +18,12 @@ import {
 } from "@/components/tasks/status-filter"
 import { useTasks } from "@/hooks/use-tasks"
 import { useTaskMutations } from "@/hooks/use-task-mutations"
+import { TaskDialog, type TaskFormValues } from "@/components/tasks/task-dialog"
 import type { Task, TaskStatus } from "@/types/task"
+
+type DialogMode =
+  | { type: "create" }
+  | { type: "edit"; task: Task }
 
 const columns: { status: TaskStatus; title: string }[] = [
   { status: "pending", title: "Pendente" },
@@ -34,6 +39,7 @@ function App() {
   const mutations = useTaskMutations()
 
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [dialogMode, setDialogMode] = useState<DialogMode | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -78,6 +84,19 @@ function App() {
     if (ok === null) setTasks(() => previous)
   }
 
+  function handleEdit(task: Task) {
+    setDialogMode({ type: "edit", task })
+  }
+
+  function handleCreate() {
+    setDialogMode({ type: "create" })
+  }
+
+  function handleDialogSubmit(values: TaskFormValues, mode: DialogMode) {
+    console.log("dialog submit", { mode, values })
+    setDialogMode(null)
+  }
+
   return (
     <div className="min-h-svh bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -92,7 +111,7 @@ function App() {
           </div>
           <div className="flex items-center gap-2">
             <StatusFilterSelect value={filter} onChange={setFilter} />
-            <Button>
+            <Button onClick={handleCreate}>
               <Plus className="size-4" />
               Nova tarefa
             </Button>
@@ -160,6 +179,7 @@ function App() {
                           key={task.id}
                           task={task}
                           onDelete={handleDelete}
+                          onEdit={handleEdit}
                           isDragging={activeTask?.id === task.id}
                         />
                       ))
@@ -179,6 +199,15 @@ function App() {
           </DndContext>
         )}
       </div>
+
+      <TaskDialog
+        open={dialogMode !== null}
+        onOpenChange={(open) => {
+          if (!open) setDialogMode(null)
+        }}
+        mode={dialogMode}
+        onSubmit={handleDialogSubmit}
+      />
     </div>
   )
 }
