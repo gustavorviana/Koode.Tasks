@@ -8,9 +8,14 @@ namespace Koode.Tasks;
 
 public class TaskService(AppDbContext context)
 {
-    public async Task<TaskResponse[]> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<TaskResponse[]> GetAllAsync(Enums.TaskStatus? status, CancellationToken cancellationToken)
     {
-        var items = await context.Tasks.ToArrayAsync(cancellationToken);
+        var query = context.Tasks.AsQueryable();
+
+        if (status.HasValue)
+            query = query.Where(x => x.Status == status.Value);
+
+        var items = await query.ToArrayAsync(cancellationToken);
         return [.. items.Select(MapToResponse)];
     }
 

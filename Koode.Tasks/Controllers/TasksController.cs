@@ -9,8 +9,8 @@ namespace Koode.Tasks.Controllers;
 public class TasksController(TaskService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<TaskResponse[]> GetAllAsync(CancellationToken cancellationToken)
-        => await service.GetAllAsync(cancellationToken);
+    public async Task<TaskResponse[]> GetAllAsync([FromQuery] Enums.TaskStatus? status, CancellationToken cancellationToken)
+        => await service.GetAllAsync(status, cancellationToken);
 
     [HttpPost]
     public async Task<TaskResponse> CreateAsync(CreateTaskRequest request, CancellationToken cancellationToken)

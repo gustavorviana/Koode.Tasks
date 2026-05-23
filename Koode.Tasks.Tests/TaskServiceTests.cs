@@ -23,7 +23,7 @@ public class TaskServiceTests
     {
         var service = new TaskService(_dbContext);
 
-        var result = await service.GetAllAsync(CancellationToken.None);
+        var result = await service.GetAllAsync(null, CancellationToken.None);
 
         Assert.Empty(result);
     }
@@ -49,7 +49,7 @@ public class TaskServiceTests
         await _dbContext.SaveChangesAsync();
 
         var service = new TaskService(_dbContext);
-        var result = await service.GetAllAsync(CancellationToken.None);
+        var result = await service.GetAllAsync(null, CancellationToken.None);
 
         Assert.Equal(2, result.Length);
 
@@ -62,6 +62,48 @@ public class TaskServiceTests
         var second = Assert.Single(result, r => r.Id == 2);
         Assert.Equal("Task B", second.Title);
         Assert.Equal(Enums.TaskStatus.Done, second.Status);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_WhenStatusFilterProvided_ReturnsOnlyMatching()
+    {
+        _dbContext.Tasks.AddRange(
+            new TaskEntity { Title = "P1", Status = Enums.TaskStatus.Pending },
+            new TaskEntity { Title = "P2", Status = Enums.TaskStatus.Pending },
+            new TaskEntity { Title = "D1", Status = Enums.TaskStatus.Done });
+        await _dbContext.SaveChangesAsync();
+
+        var service = new TaskService(_dbContext);
+        var result = await service.GetAllAsync(Enums.TaskStatus.Pending, CancellationToken.None);
+
+        Assert.Equal(2, result.Length);
+        Assert.All(result, r => Assert.Equal(Enums.TaskStatus.Pending, r.Status));
+    }
+
+    [Fact]
+    public async Task GetAllAsync_WhenStatusFilterMatchesNothing_ReturnsEmptyArray()
+    {
+        _dbContext.Tasks.Add(new TaskEntity { Title = "P1", Status = Enums.TaskStatus.Pending });
+        await _dbContext.SaveChangesAsync();
+
+        var service = new TaskService(_dbContext);
+        var result = await service.GetAllAsync(Enums.TaskStatus.Done, CancellationToken.None);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_WhenStatusFilterNull_ReturnsAll()
+    {
+        _dbContext.Tasks.AddRange(
+            new TaskEntity { Title = "P1", Status = Enums.TaskStatus.Pending },
+            new TaskEntity { Title = "D1", Status = Enums.TaskStatus.Done });
+        await _dbContext.SaveChangesAsync();
+
+        var service = new TaskService(_dbContext);
+        var result = await service.GetAllAsync(null, CancellationToken.None);
+
+        Assert.Equal(2, result.Length);
     }
 
     [Fact]
