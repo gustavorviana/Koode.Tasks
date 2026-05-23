@@ -1,6 +1,8 @@
+using System.Net;
 using Koode.Tasks.Data;
 using Koode.Tasks.Entities;
 using Koode.Tasks.Enums;
+using Koode.Tasks.Exceptions;
 using Koode.Tasks.Requests;
 using Microsoft.EntityFrameworkCore;
 
@@ -187,7 +189,7 @@ public class TaskServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenEntityNotFound_ThrowsInvalidOperationException()
+    public async Task UpdateAsync_WhenEntityNotFound_ThrowsNotFoundException()
     {
         var service = new TaskService(_dbContext);
         var request = new UpdateTaskRequest
@@ -197,10 +199,11 @@ public class TaskServiceTests
             Status = Enums.TaskStatus.Done
         };
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+        var ex = await Assert.ThrowsAsync<NotFoundException>(
             () => service.UpdateAsync(999, request, CancellationToken.None));
 
-        Assert.Equal("Task not found.", ex.Message);
+        Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
+        Assert.Equal("Task with id 999 not found.", ex.Message);
     }
 
     [Fact]

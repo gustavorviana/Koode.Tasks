@@ -1,5 +1,6 @@
 ﻿using Koode.Tasks.Data;
 using Koode.Tasks.Entities;
+using Koode.Tasks.Exceptions;
 using Koode.Tasks.Requests;
 using Koode.Tasks.Responses;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ public class TaskService(AppDbContext context)
     public async Task<TaskResponse> UpdateAsync(int id, UpdateTaskRequest request, CancellationToken cancellationToken)
     {
         var entity = await context.Tasks.FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
-            throw new InvalidOperationException("Task not found.");
+            throw new NotFoundException($"Task with id {id} not found.");
 
         entity.Title = request.Title;
         entity.Description = request.Description;
