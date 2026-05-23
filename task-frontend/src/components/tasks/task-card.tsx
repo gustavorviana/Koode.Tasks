@@ -10,17 +10,14 @@ const dateFmt = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
 })
 
-export function TaskCard({
-  task,
-  onDelete,
-  onEdit,
-  isDragging,
-}: {
+interface TaskCardProps {
   task: Task
   onDelete: (task: Task) => void
   onEdit?: (task: Task) => void
   isDragging?: boolean
-}) {
+}
+
+export function TaskCard({ task, onDelete, onEdit, isDragging }: TaskCardProps) {
   const isDone = task.status === "done"
   const draggable = useDraggable({
     id: task.id,

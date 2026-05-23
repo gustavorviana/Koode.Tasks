@@ -18,12 +18,13 @@ import {
 } from "@/components/tasks/status-filter"
 import { useTasks } from "@/hooks/use-tasks"
 import { useTaskMutations } from "@/hooks/use-task-mutations"
-import { TaskDialog, type TaskFormValues } from "@/components/tasks/task-dialog"
+import {
+  TaskDialog,
+  type TaskDialogMode,
+  type TaskDialogResult,
+  type TaskFormValues,
+} from "@/components/tasks/task-dialog"
 import type { Task, TaskStatus } from "@/types/task"
-
-type DialogMode =
-  | { type: "create" }
-  | { type: "edit"; task: Task }
 
 const columns: { status: TaskStatus; title: string }[] = [
   { status: "pending", title: "Pendente" },
@@ -39,7 +40,7 @@ function App() {
   const mutations = useTaskMutations()
 
   const [activeTask, setActiveTask] = useState<Task | null>(null)
-  const [dialogMode, setDialogMode] = useState<DialogMode | null>(null)
+  const [dialogMode, setDialogMode] = useState<TaskDialogMode | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -92,9 +93,38 @@ function App() {
     setDialogMode({ type: "create" })
   }
 
-  function handleDialogSubmit(values: TaskFormValues, mode: DialogMode) {
-    console.log("dialog submit", { mode, values })
-    setDialogMode(null)
+  async function handleDialogSubmit(
+    values: TaskFormValues,
+    mode: TaskDialogMode,
+  ): Promise<TaskDialogResult> {
+    if (mode.type === "create") {
+      const result = await mutations.create({
+        title: values.title,
+        description: values.description ?? null,
+      })
+      if (!result.ok) return result
+      const created = result.data
+      if (filter === "all" || filter === created.status) {
+        setTasks((prev) => [created, ...prev])
+      }
+      return { ok: true }
+    }
+
+    const result = await mutations.update(mode.task.id, {
+      title: values.title,
+      description: values.description ?? null,
+      status: values.status,
+    })
+    if (!result.ok) return result
+    const updated = result.data
+    if (filter !== "all" && filter !== updated.status) {
+      setTasks((prev) => prev.filter((t) => t.id !== updated.id))
+    } else {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === updated.id ? updated : t)),
+      )
+    }
+    return { ok: true }
   }
 
   return (
@@ -192,7 +222,7 @@ function App() {
             <DragOverlay dropAnimation={null}>
               {activeTask && (
                 <div className="rotate-1">
-                  <TaskCard task={activeTask} onDelete={() => {}} />
+                  <TaskCard task={activeTask} onDelete={() => { }} />
                 </div>
               )}
             </DragOverlay>

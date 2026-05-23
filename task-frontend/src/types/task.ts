@@ -1,6 +1,6 @@
 export type TaskStatus = "pending" | "in_progress" | "done"
 
-export type Task = {
+export interface Task {
   id: number
   title: string
   description: string | null
@@ -9,12 +9,12 @@ export type Task = {
   updatedAt: string | null
 }
 
-export type CreateTaskInput = {
+export interface CreateTaskInput {
   title: string
   description?: string | null
 }
 
-export type UpdateTaskInput = {
+export interface UpdateTaskInput {
   title: string
   description?: string | null
   status: TaskStatus

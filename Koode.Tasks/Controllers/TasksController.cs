@@ -20,7 +20,7 @@ public class TasksController(TaskService service) : ControllerBase
     public async Task<ActionResult<TaskResponse>> CreateAsync(CreateTaskRequest request, CancellationToken cancellationToken)
     {
         var created = await service.CreateAsync(request, cancellationToken);
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = created.Id }, created);
+        return Created($"/api/tasks/{created.Id}", created);
     }
 
     [HttpPut("{id:int}")]

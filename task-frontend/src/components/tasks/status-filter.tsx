@@ -9,20 +9,24 @@ import type { TaskStatus } from "@/types/task"
 
 export type StatusFilter = TaskStatus | "all"
 
-const options: { value: StatusFilter; label: string }[] = [
+interface StatusFilterOption {
+  value: StatusFilter
+  label: string
+}
+
+interface StatusFilterSelectProps {
+  value: StatusFilter
+  onChange: (next: StatusFilter) => void
+}
+
+const options: StatusFilterOption[] = [
   { value: "all", label: "Todos os status" },
   { value: "pending", label: "Pendente" },
   { value: "in_progress", label: "Em andamento" },
   { value: "done", label: "Concluída" },
 ]
 
-export function StatusFilterSelect({
-  value,
-  onChange,
-}: {
-  value: StatusFilter
-  onChange: (next: StatusFilter) => void
-}) {
+export function StatusFilterSelect({ value, onChange }: StatusFilterSelectProps) {
   return (
     <Select value={value} onValueChange={(v) => onChange(v as StatusFilter)}>
       <SelectTrigger className="w-45" aria-label="Filtrar por status">

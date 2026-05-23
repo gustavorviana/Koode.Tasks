@@ -10,17 +10,14 @@ const headerColors: Record<TaskStatus, string> = {
   done: "bg-emerald-500",
 }
 
-export function TaskColumn({
-  status,
-  title,
-  count,
-  children,
-}: {
+interface TaskColumnProps {
   status: TaskStatus
   title: string
   count: number
   children: ReactNode
-}) {
+}
+
+export function TaskColumn({ status, title, count, children }: TaskColumnProps) {
   const droppable = useDroppable({ id: `column-${status}`, data: { status } })
 
   return (
