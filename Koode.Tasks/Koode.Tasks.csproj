@@ -4,6 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SpaRoot>..\task-frontend\</SpaRoot>
+    <SpaDist>$(SpaRoot)dist\</SpaDist>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +18,31 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <SpaInputs Include="$(SpaRoot)src\**\*" />
+    <SpaInputs Include="$(SpaRoot)public\**\*" />
+    <SpaInputs Include="$(SpaRoot)index.html" />
+    <SpaInputs Include="$(SpaRoot)package.json" />
+    <SpaInputs Include="$(SpaRoot)pnpm-lock.yaml" />
+    <SpaInputs Include="$(SpaRoot)tsconfig*.json" />
+    <SpaInputs Include="$(SpaRoot)vite.config.ts" />
+  </ItemGroup>
+
+  <Target Name="EnsureSpaDependencies" BeforeTargets="BuildSpa" Condition="!Exists('$(SpaRoot)node_modules')">
+    <Exec Command="pnpm install --frozen-lockfile" WorkingDirectory="$(SpaRoot)" />
+  </Target>
+
+  <Target Name="BuildSpa" BeforeTargets="AssignTargetPaths" Inputs="@(SpaInputs)" Outputs="$(MSBuildProjectDirectory)\wwwroot\index.html">
+    <Exec Command="pnpm run build" WorkingDirectory="$(SpaRoot)" />
+    <ItemGroup>
+      <_SpaDistFiles Include="$(SpaDist)**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\wwwroot" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)\wwwroot" />
+    <Copy SourceFiles="@(_SpaDistFiles)" DestinationFiles="@(_SpaDistFiles->'$(MSBuildProjectDirectory)\wwwroot\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>
