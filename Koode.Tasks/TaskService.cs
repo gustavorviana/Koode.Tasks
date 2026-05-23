@@ -20,6 +20,14 @@ public class TaskService(AppDbContext context)
         return [.. items.Select(MapToResponse)];
     }
 
+    public async Task<TaskResponse> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var entity = await context.Tasks.FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
+            throw new NotFoundException($"Tarefa com id {id} não encontrada.");
+
+        return MapToResponse(entity);
+    }
+
     public async Task<TaskResponse> CreateAsync(CreateTaskRequest request, CancellationToken cancellationToken)
     {
         var entity = new TaskEntity
